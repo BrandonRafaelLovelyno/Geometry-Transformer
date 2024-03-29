@@ -47,9 +47,14 @@ def open_transform_options():
 
 # scroll bar canvas config function
 def draw_scrollbar():
+    
+    right_frame = tk.Frame(root)
+    right_frame.pack(side=tk.RIGHT, fill=tk.Y)
+    
+    
     x_scrollbar = tk.Scrollbar(frame, orient=tk.HORIZONTAL,command=main_canvas.xview)
     x_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
-    y_scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL,command=main_canvas.yview)
+    y_scrollbar = tk.Scrollbar(right_frame, orient=tk.VERTICAL,command=main_canvas.yview)
     y_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     
     main_canvas.configure(yscrollcommand=y_scrollbar.set, xscrollcommand=x_scrollbar.set)
@@ -62,12 +67,12 @@ root = tk.Tk()
 root.title("Geometry Transformer")
 
 # initializing the main frame
-frame= tk.Frame(root,width=1500, height=1500)
-frame.pack(fill=tk.BOTH, expand=True)
+frame= tk.Frame(root)
+frame.pack(side=tk.LEFT,fill=tk.BOTH, expand=True)
 
 # initializing the main canvas
 main_canvas=tk.Canvas(frame,width=100, height=100)
-main_canvas.pack(side=tk.LEFT,fill=tk.BOTH, expand=True)
+main_canvas.pack(fill=tk.BOTH, expand=True)
 
 # preparing the main canvas
 draw_cartesian_grid()
@@ -75,10 +80,6 @@ draw_cartesian_axes()
 
 # preparing the scrollbar canvas
 draw_scrollbar()
-
-# create second frame inside canvas 
-second_frame = tk.Frame(main_canvas)
-main_canvas.create_window((0, 0), window=second_frame, anchor='nw')
 
 # attaching main canvas event listener
 main_canvas.bind('<ButtonPress-1>', on_press)
