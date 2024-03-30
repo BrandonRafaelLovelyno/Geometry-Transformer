@@ -86,15 +86,22 @@ def draw_scrollbar():
 
 # transformation interface
 
-def open_transform_options():
-    transform_window = tk.Toplevel(root,height=300,width=300,padx=10,pady=10)
-    center_window(transform_window)
-    transform_window.title("Transform Options")
+def open_transform_selection_window():
+    transform_selection_window = tk.Toplevel(root,height=300,width=300,padx=10,pady=10)
+    center_window(transform_selection_window)
+    transform_selection_window.title("Transform Options")
+    
+    transform_query_window=tk.Toplevel(root,height=300,width=300,padx=10,pady=10)
+    center_window(transform_query_window)
+    
+    global transformation_query_list
+    transformation_query_list=tk.Listbox(transform_query_window)
+    transformation_query_list.pack(side='top',anchor='center',pady=10)
 
     transform_options_text = ["Translate", "Rotate", "Scale", "Shear","Mirror"]
     transform_options_command = [open_translation, open_rotation, open_scaling, open_shearing,open_mirror]
     for text,command in zip(transform_options_text,transform_options_command):
-        tk.Button(transform_window, text=text,command=command,bg='red',fg='white',font='Arial 12').pack(side='top',anchor='center',pady=10)
+        tk.Button(transform_selection_window, text=text,command=command,bg='red',fg='white',font='Arial 12').pack(side='top',anchor='center',pady=10)
         
 def open_rotation():
     rotation_window = tk.Toplevel(root,height=200,width=400,padx=20,pady=10)
@@ -224,10 +231,13 @@ def open_mirror():
 def submit_rotation(x,y,angle):
     rotation = Rotation(x, y, angle)
     transformation_query.append(rotation)
+    transformation_query_list.insert(tk.END,"HAI")
+    
     
 def submit_translation(x,y):
     translation = Translation(x, y)
     transformation_query.append(translation)
+    
     
 def submit_scaling(x,y,scale):
     scaling = Scaling(x, y, scale)
@@ -277,7 +287,7 @@ draw_scrollbar()
 main_canvas.bind('<ButtonPress-1>', on_press)
 
 # attaching transform button
-transform_button = tk.Button(frame, text="Transform", command=open_transform_options,bg="blue", fg="white",font='Arial 12')
+transform_button = tk.Button(frame, text="Transform", command=open_transform_selection_window,bg="blue", fg="white",font='Arial 12')
 transform_button.place(x=frame.winfo_width()+100,y=frame.winfo_height()+100, anchor=tk.CENTER)
 
 root.mainloop()
