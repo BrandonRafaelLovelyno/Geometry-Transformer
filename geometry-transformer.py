@@ -15,8 +15,8 @@ def draw_cartesian_grid():
         main_canvas.create_line(-1*final_cartesian_coord-1, i, final_cartesian_coord+1, i, fill="lightgray", dash=(2, 2)) 
         
         # adding grid number
-        main_canvas.create_text(center_coord_x+i,center_coord_y+10,text=(str(i)),fill="black")
-        main_canvas.create_text(center_coord_x+10,center_coord_y+i,text=(str(-i)),fill="black")
+        main_canvas.create_text(i,center_coord_y+20,text=(str(-i+500)),fill="black")
+        main_canvas.create_text(center_coord_x+20,i,text=(str(-i+500)),fill="black")
         
 def draw_cartesian_axes():
     main_canvas.create_line(center_coord_x,center_coord_y, final_cartesian_coord+1, center_coord_y, arrow=tk.LAST)
