@@ -1,4 +1,5 @@
 import tkinter as tk
+import numpy as np
 
 # declaring transformation class
 class Rotation:
@@ -23,7 +24,7 @@ class Shearing:
         self.x = x
         self.y = y
         
-class Mirror:
+class Reflection:
     def __init__(self, axis,x,y):
         self.axis = axis
         self.x=x
@@ -87,7 +88,7 @@ def draw_scrollbar():
 # transformation interface
 
 def open_transform_selection_window():
-    transform_selection_window = tk.Toplevel(root,height=300,width=300,padx=10,pady=10)
+    transform_selection_window = tk.Toplevel(root,height=400,width=300,padx=10,pady=10)
     left_window(transform_selection_window)
     transform_selection_window.title("Transform Options")
     
@@ -98,10 +99,13 @@ def open_transform_selection_window():
     transformation_query_list=tk.Listbox(transform_query_window,width=280)
     transformation_query_list.pack(side='top',anchor='center',pady=10)
 
-    transform_options_text = ["Translate", "Rotate", "Scale", "Shear","Mirror"]
-    transform_options_command = [open_translation, open_rotation, open_scaling, open_shearing,open_mirror]
+    transform_options_text = ["Translate", "Rotate", "Scale", "Shear","reflection"]
+    transform_options_command = [open_translation, open_rotation, open_scaling, open_shearing,open_reflection]
+    
     for text,command in zip(transform_options_text,transform_options_command):
         tk.Button(transform_selection_window, text=text,command=command,bg='red',fg='white',font='Arial 12').pack(side='top',anchor='center',pady=10)
+    
+    tk.Button(transform_selection_window,text="Execute",command=lambda: execute_transformation(),bg='black',fg='white',font='Arial 12').pack(side='top',anchor='e',pady=20)
         
 def open_rotation():
     rotation_window = tk.Toplevel(root,height=200,width=400,padx=20,pady=10)
@@ -204,27 +208,27 @@ def open_shearing():
     submit_button.grid(row=3,column=0,columnspan=2,pady=10)
     
     
-def open_mirror():
-    mirror_window= tk.Toplevel(root,height=300,width=300,padx=10,pady=10)
-    mirror_window.title("Mirror")
-    center_window(mirror_window)
+def open_reflection():
+    reflection_window= tk.Toplevel(root,height=300,width=300,padx=10,pady=10)
+    reflection_window.title("Reflection")
+    center_window(reflection_window)
     
     # Axis
-    axis_label=tk.Label(mirror_window,text="Axix (x or y) :")
+    axis_label=tk.Label(reflection_window,text="Axix (x or y) :")
     axis_label.grid(row=0,column=0,padx=10,pady=5,sticky=tk.W)
     
-    axis_entry=tk.Entry(mirror_window)
+    axis_entry=tk.Entry(reflection_window)
     axis_entry.grid(row=0,column=1,padx=10,pady=5,sticky=tk.W)
     
     # Coordinate 
-    coordinate_label=tk.Label(mirror_window,text="Coordinate :")
+    coordinate_label=tk.Label(reflection_window,text="Coordinate :")
     coordinate_label.grid(row=1,column=0,padx=10,pady=5,sticky=tk.W)
     
-    coordinate_entry=tk.Entry(mirror_window)
+    coordinate_entry=tk.Entry(reflection_window)
     coordinate_entry.grid(row=1,column=1,padx=10,pady=5,sticky=tk.W)
     
     # Create a button to submit input
-    submit_button=tk.Button(mirror_window,text="Submit",command=lambda: submit_mirror(axis_entry.get(),float(coordinate_entry.get()),float(coordinate_entry.get())),bg='blue',fg='white',font='Arial 12')
+    submit_button=tk.Button(reflection_window,text="Submit",command=lambda: submit_reflection(axis_entry.get(),float(coordinate_entry.get()),float(coordinate_entry.get())),bg='blue',fg='white',font='Arial 12')
     submit_button.grid(row=2,column=0,columnspan=2,pady=10)
 
 # transformation submit functions
@@ -250,12 +254,72 @@ def submit_shearing(x,y):
     transformation_query.append(shearing)
     transformation_query_list.insert(tk.END,"Shearing: x="+str(x)+", y="+str(y))
 
-def submit_mirror(axis,x,y):
-    mirror = Mirror(axis,x,y)
-    transformation_query.append(mirror)
-    transformation_query_list.insert(tk.END,"Mirror: axis="+str(axis)+", x="+str(x)+", y="+str(y))
+def submit_reflection(axis,x,y):
+    reflection = Reflection(axis,x,y)
+    transformation_query.append(reflection)
+    transformation_query_list.insert(tk.END,"reflection: axis="+str(axis)+", x="+str(x)+", y="+str(y))
     
+# transformation calculation
+def calculate_rotation(rotation:Rotation):
+    center_matrix=np.array([[rotation.x],[rotation.y]])
+    angle_matrix=np.array([[np.cos(rotation.angle),-np.sin(rotation.angle)],[np.sin(rotation.angle),np.cos(rotation.angle)]])
+    for i,dots in enumerate(dots_coords):
+        np_dots=np.array(dots)
+        np_dots=np_dots-center_matrix
+        np_dots=np.dot(angle_matrix,np_dots)
+        np_dots=np_dots+center_matrix
+        dots_coords[i]=np_dots.tolist()
+        
 
+def calculate_translation(translation:Translation):
+    for i,dots in enumerate(dots_coords):
+        np_dots=np.array(dots)
+        np_dots=np_dots+np.array([[translation.x,translation.y]])
+        dots_coords[i]=np_dots.tolist()
+
+def calculate_scaling(scaling:Scaling):
+    scale_matrix=np.array([[scaling.scale,0],[0,scaling.scale]])
+    for i,dots in enumerate(dots_coords):
+        np_dots=np.array(dots)
+        np_dots=np.dot(scale_matrix,np_dots)
+        dots_coords[i]=np_dots.tolist()
+
+def calculate_shearing(shearing:Shearing):
+    shearing_matrix=np.array([[1,shearing.x],[shearing.y,1]])
+    for i,dots in enumerate(dots_coords):
+        np_dots=np.array(dots)
+        np_dots=np.dot(shearing_matrix,np_dots)
+        dots_coords[i]=np_dots.tolist()
+
+def calculate_reflection(reflection:Reflection):
+    reflection_x_matrix=np.array([-1,0,reflection.x*2],[0,1,0],[0,0,1])
+    reflection_y_matrix=np.array([1,0,0],[0,-1,reflection.y*2],[0,0,1])
+    for i,dots in enumerate(dots_coords):
+        np_dots=np.array(dots)    
+        np_dots=np.hstack((np_dots,[1]))
+        if(reflection.axis=='x'):
+            np_dots=np.dot(reflection_x_matrix,np_dots)
+        else:
+            np_dots=np.dot(reflection_y_matrix,np_dots)
+        dots_coords[i]=np_dots.tolist()
+
+# transformation execution
+def execute_transformation():
+    print(dots_coords)
+    for transformation in transformation_query:
+       if(isinstance(transformation,Translation)):
+           calculate_translation(transformation)
+       elif(isinstance(transformation,Rotation)):
+           calculate_rotation(transformation)
+       elif(isinstance(transformation,Reflection)):
+           calculate_reflection(transformation)
+       elif(isinstance(transformation,Shearing)):
+           calculate_shearing(transformation)
+       else:
+           calculate_scaling(transformation)
+    transformation_query.clear()
+    print(dots_coords)
+       
 # tkinter helper
 
 def center_window(window):
