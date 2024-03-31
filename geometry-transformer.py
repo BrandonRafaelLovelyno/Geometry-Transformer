@@ -88,14 +88,14 @@ def draw_scrollbar():
 
 def open_transform_selection_window():
     transform_selection_window = tk.Toplevel(root,height=300,width=300,padx=10,pady=10)
-    center_window(transform_selection_window)
+    left_window(transform_selection_window)
     transform_selection_window.title("Transform Options")
     
     transform_query_window=tk.Toplevel(root,height=300,width=300,padx=10,pady=10)
     center_window(transform_query_window)
     
     global transformation_query_list
-    transformation_query_list=tk.Listbox(transform_query_window)
+    transformation_query_list=tk.Listbox(transform_query_window,width=280)
     transformation_query_list.pack(side='top',anchor='center',pady=10)
 
     transform_options_text = ["Translate", "Rotate", "Scale", "Shear","Mirror"]
@@ -231,25 +231,29 @@ def open_mirror():
 def submit_rotation(x,y,angle):
     rotation = Rotation(x, y, angle)
     transformation_query.append(rotation)
-    transformation_query_list.insert(tk.END,"HAI")
+    transformation_query_list.insert(tk.END,"Rotation: x="+str(x)+", y="+str(y)+", angle="+str(angle)+" degrees")
     
     
 def submit_translation(x,y):
     translation = Translation(x, y)
     transformation_query.append(translation)
+    transformation_query_list.insert(tk.END,"Translation: x="+str(x)+", y="+str(y))
     
     
 def submit_scaling(x,y,scale):
     scaling = Scaling(x, y, scale)
     transformation_query.append(scaling)
+    transformation_query_list.insert(tk.END,"Scaling: x="+str(x)+", y="+str(y)+", scale="+str(scale))
 
 def submit_shearing(x,y):
     shearing = Shearing(x, y)
     transformation_query.append(shearing)
+    transformation_query_list.insert(tk.END,"Shearing: x="+str(x)+", y="+str(y))
 
 def submit_mirror(axis,x,y):
     mirror = Mirror(axis,x,y)
     transformation_query.append(mirror)
+    transformation_query_list.insert(tk.END,"Mirror: axis="+str(axis)+", x="+str(x)+", y="+str(y))
     
 
 # tkinter helper
@@ -259,6 +263,14 @@ def center_window(window):
     width = window.winfo_width()
     height = window.winfo_height()
     x = (window.winfo_screenwidth() // 2) - (width // 2)
+    y = (window.winfo_screenheight() // 2) - (height // 2)
+    window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+
+def left_window(window):
+    window.update_idletasks()
+    width = window.winfo_width()
+    height = window.winfo_height()
+    x = (window.winfo_screenwidth() // 3) - (width // 3)
     y = (window.winfo_screenheight() // 2) - (height // 2)
     window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
